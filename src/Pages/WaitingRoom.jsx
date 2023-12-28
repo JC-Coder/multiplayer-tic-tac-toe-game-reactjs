@@ -8,7 +8,7 @@ const WaitingRoom = () => {
     <div className={'container flex items-center justify-center h-[98vh]'}>
       <section
         className={
-          'h-[60vh] w-[450px] bg-[#224353] rounded-md shadow-md flex flex-col p-4 justify-between'
+          'h-[60vh] w-[300px] md:w-[450px] bg-[#224353] rounded-md shadow-md flex flex-col p-4 justify-between items-center text-center'
         }
       >
         <div>

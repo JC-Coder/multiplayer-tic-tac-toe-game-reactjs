@@ -1,10 +1,29 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { axiosInstance } from '../Util/axios';
+import { io } from 'socket.io-client';
+import { APP_CONSTANTS } from '../Util/constants';
+import { useDispatch, useSelector } from 'react-redux';
+import { setSocket } from '../Util/action';
 
 const Home = () => {
   let [createGame, setCreateGame] = useState(false);
   let [joinGame, setJoinGame] = useState(false);
+  const [createGameInput, setCreateGameInput] = useState('');
   const navigate = useNavigate();
+  const [gameId, setGameId] = useState(null);
+  const dispatch = useDispatch();
+  const socket = useSelector((state) => state.socket);
+
+  useEffect(() => {
+    if (socket) {
+      // listeners
+
+      socket.data.on('createGameRes', (data) => {
+        console.log('createGameRes', data);
+      });
+    }
+  }, [socket, dispatch]);
 
   const exist = () => {
     setCreateGame(false);
@@ -16,16 +35,25 @@ const Home = () => {
   };
 
   const handleCreateGame = () => {
-    navigate('/waiting');
+    if (socket) {
+      socket.data.emit('createGame', {
+        name: createGameInput
+      });
+    }
+    // navigate('/waiting');
   };
+
+  useEffect(() => {
+    console.log('create game input', createGameInput);
+  }, [createGameInput]);
 
   return (
     <>
-      <div className="flex flex-col h-[98vh] max-h-[98vh] overflow-hidden items-center justify-center">
+      <div className="container flex flex-col h-[98vh] max-h-[98vh] overflow-hidden items-center justify-center">
         {/* home section */}
-        <section className={createGame || joinGame ? 'hidden' : 'block'}>
+        <section className={`${createGame || joinGame ? 'hidden' : 'block'}`}>
           <div>
-            <h1 className="text-6xl font-bold mb-9">
+            <h1 className="text-2xl md:text-6xl font-bold mb-9 text-center">
               Online Multiplayer Tic Tac Toe <br />{' '}
               <span className="text-yellow-500">Game</span>
             </h1>
@@ -33,13 +61,13 @@ const Home = () => {
 
           <div className="flex items-center justify-center pt-9 space-x-6">
             <button
-              className="button-1 bg-[#1f3540] text-[#26ffcb]"
+              className=" bg-[#1f3540] text-[#26ffcb] px-6 py-3 rounded-2xl text-xl"
               onClick={() => setCreateGame(true)}
             >
               Create Game
             </button>
             <button
-              className="button-1 bg-[#27ffcb] text-black"
+              className="px-6 py-3 rounded-2xl text-xl bg-[#27ffcb] text-black"
               onClick={() => setJoinGame(true)}
             >
               Join Game
@@ -48,7 +76,7 @@ const Home = () => {
         </section>
 
         {/* create game section */}
-        <section className={!createGame && 'hidden'}>
+        <section className={`${!createGame && 'hidden'}`}>
           <h3 className={'text-4xl md:text-6xl text-white font-bold mb-9'}>
             Create New Game
           </h3>
@@ -64,6 +92,7 @@ const Home = () => {
                   'block flex-1 border-0 bg-transparent py-2 pl-3 text-white placeholder:text-gray-400 focus:ring-0 sm:text-md sm:leading-6 outline-none'
                 }
                 placeholder="Enter Game Invitation Code"
+                onChange={(event) => setCreateGameInput(event.target.value)}
               />
             </div>
             <div className={'flex items-center justify-center space-x-4'}>
