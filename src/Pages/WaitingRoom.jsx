@@ -1,8 +1,25 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
 
 const WaitingRoom = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const socket = useSelector((state) => state.socket);
+
+  useEffect(() => {
+    if (socket) {
+      // listeners
+
+      socket.data.on('opponentJoinGame', (data) => {
+        console.log('opponentJoinGame', data);
+
+        if (data.success) {
+          navigate('/play');
+        }
+      });
+    }
+  }, [socket, dispatch]);
 
   return (
     <div className={'container flex items-center justify-center h-[98vh]'}>

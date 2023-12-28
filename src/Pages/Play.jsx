@@ -1,7 +1,8 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import circleIcon from '../assets/circle.png';
 import crossIcon from '../assets/cross.png';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
 
 const initialData = Array(9).fill('');
 
@@ -18,11 +19,73 @@ const Play = () => {
   const [currentPlayer, setCurrentPlayer] = useState(true);
   const [waitingForOpponent, setWaitingForOpponent] = useState(false);
 
+  const dispatch = useDispatch();
+  const socket = useSelector((state) => state.socket);
+
+  /**
+   * game play socket start
+   */
   useEffect(() => {
-    const players = [crossIcon, circleIcon];
-    const randomIndex = Math.floor(Math.random() * players.length);
-    setPlayer(players[randomIndex]);
-  }, []);
+    if (socket) {
+      // listeners
+
+      // game start
+      socket.data.on('gameStart', () => {
+        console.log('gameStart event');
+        setCurrentPlayer(false);
+      });
+
+      // get current player
+      socket.data.on('currentPlayer', (data) => {
+        console.log('currentPlayer', data);
+        if (data === 'x') {
+          setPlayer(crossIcon);
+        } else {
+          setPlayer(circleIcon);
+        }
+      });
+
+      // toggle event
+      socket.data.on('toggle', (data) => {
+        console.log('toggle', data);
+        setData(data);
+        checkWin(data);
+        setCurrentPlayer(true);
+      });
+
+      // next game
+      socket.data.on('nextGame', () => {
+        setWinner(null);
+        setLock(false);
+        setData(initialData);
+        setCurrentPlayer(false);
+      });
+
+      // end game
+      socket.data.on('endGame', () => {
+        window.alert('Opponent has ended game , redirecting to homepage ...');
+        setTimeout(() => {
+          navigate('/');
+        }, 2000);
+      });
+
+      // starting player
+      socket.data.on('startPlayer', () => {
+        console.log('startPlayer event');
+        setCurrentPlayer(true);
+      });
+    }
+  }, [socket, dispatch]);
+
+  /**
+   * game play socket end
+   */
+
+  // useEffect(() => {
+  //   const players = [crossIcon, circleIcon];
+  //   const randomIndex = Math.floor(Math.random() * players.length);
+  //   setPlayer(players[randomIndex]);
+  // }, []);
 
   const winPatterns = [
     [0, 1, 2],
@@ -46,14 +109,21 @@ const Play = () => {
     if (player === crossIcon) {
       newData[index] = 'x';
       setPlayer(circleIcon);
+      socket.data.emit('currentPlayer', 'o');
     } else {
       newData[index] = 'o';
       setPlayer(crossIcon);
+      socket.data.emit('currentPlayer', 'x');
+    }
+
+    if (socket) {
+      socket.data.emit('toggle', newData);
     }
 
     setData(newData);
     setCount(count + 1);
     checkWin(newData);
+    setCurrentPlayer(false);
     // setCurrentPlayer(prev => !prev)
   };
 
@@ -94,22 +164,38 @@ const Play = () => {
     }
   };
 
-  const endGame = () => {
-    navigate('/');
-    // setLock(false);
-    // setData(initialData);
-    // setCircleScore(0);
-    // setCrossScore(0);
-  };
-
   const nextGame = () => {
-    if (data.includes('') && !winner ) {
-        return;
+    if (data.includes('') && !winner) {
+      const players = ['x', 'o'];
+      const randomIndex = Math.floor(Math.random() * players.length);
+      socket.data.emit('currentPlayer', players[randomIndex]);
+      return;
+    }
+
+    if (socket) {
+      socket.data.emit('nextGame');
+
+      if (winner === 'x') {
+        socket.data.emit('currentPlayer', 'x');
+      } else {
+        socket.data.emit('currentPlayer', 'o');
+      }
     }
 
     setWinner(null);
     setLock(false);
     setData(initialData);
+  };
+
+  const endGame = () => {
+    // const res = prompt('Do you want to end game , yes / no?');
+    // console.log('prompt', res);
+    // if (res.trim().toLowerCase() === 'yes') {
+    navigate('/');
+    //   if (socket) {
+    //     socket.data.emit('endGame');
+    //   }
+    // }
   };
 
   return (
@@ -120,8 +206,8 @@ const Play = () => {
             gameStart && !winner ? 'visible' : 'hidden'
           }`}
         >
-          <img className={'w-10 h-10'} src={player} />
-          <span>Turn</span>
+          {/* <img className={'w-10 h-10'} src={player} /> */}
+          <span>{currentPlayer ? 'Your' : 'Opponent'} Turn</span>
         </div>
 
         <div

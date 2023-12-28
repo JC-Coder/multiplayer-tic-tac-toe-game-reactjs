@@ -10,6 +10,7 @@ const Home = () => {
   let [createGame, setCreateGame] = useState(false);
   let [joinGame, setJoinGame] = useState(false);
   const [createGameInput, setCreateGameInput] = useState('');
+  const [joinGameInput, setJoinGameInput] = useState('');
   const navigate = useNavigate();
   const [gameId, setGameId] = useState(null);
   const dispatch = useDispatch();
@@ -21,6 +22,18 @@ const Home = () => {
 
       socket.data.on('createGameRes', (data) => {
         console.log('createGameRes', data);
+
+        if (data.success) {
+          navigate('/waiting');
+        }
+      });
+
+      socket.data.on('joinGameRes', (data) => {
+        console.log('joinGameRes', data);
+
+        if (data.success) {
+          navigate('/play');
+        }
       });
     }
   }, [socket, dispatch]);
@@ -31,7 +44,12 @@ const Home = () => {
   };
 
   const handleJoinGame = () => {
-    navigate('/play');
+    // navigate('/play');
+    if (socket) {
+      socket.data.emit('joinGame', {
+        name: joinGameInput
+      });
+    }
   };
 
   const handleCreateGame = () => {
@@ -133,6 +151,7 @@ const Home = () => {
                   'block flex-1 border-0 bg-transparent py-2 pl-3 text-white placeholder:text-gray-400 focus:ring-0 sm:text-md sm:leading-6 outline-none'
                 }
                 placeholder="Enter Game Code"
+                onChange={(event) => setJoinGameInput(event.target.value)}
               />
             </div>
             <div className={'flex items-center justify-center space-x-4'}>
