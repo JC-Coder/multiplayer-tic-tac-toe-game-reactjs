@@ -1,3 +1,3 @@
 export const APP_CONSTANTS = {
-  baseUrl: 'http://localhost:2222'
+  baseUrl: 'https://tic-tac-teo.adaptable.app'
 };
