@@ -14,7 +14,6 @@ const Play = () => {
   const [crossScore, setCrossScore] = useState(0);
   const [winner, setWinner] = useState(null);
   const [player, setPlayer] = useState('x');
-  const [gameStart, setGameStart] = useState(true);
   const navigate = useNavigate();
   const [currentPlayer, setCurrentPlayer] = useState(false);
 
@@ -40,22 +39,6 @@ const Play = () => {
         setCurrentPlayer(true);
       });
 
-      // // game start
-      // socket.data.on('gameStart', () => {
-      //   console.log('gameStart event');
-      //   setCurrentPlayer(false);
-      // });
-
-      // // get current player
-      // socket.data.on('currentPlayer', (data) => {
-      //   console.log('currentPlayer', data);
-      //   if (data === 'x') {
-      //     setPlayer(crossIcon);
-      //   } else {
-      //     setPlayer(circleIcon);
-      //   }
-      // });
-
       // toggle event
       socket.data.on('toggle', (data) => {
         console.log('toggle', data);
@@ -79,24 +62,12 @@ const Play = () => {
           navigate('/');
         }, 2000);
       });
-
-      // // starting player
-      // socket.data.on('startPlayer', () => {
-      //   console.log('startPlayer event');
-      //   setCurrentPlayer(true);
-      // });
     }
   }, [socket, dispatch]);
 
   /**
    * game play socket end
    */
-
-  // useEffect(() => {
-  //   const players = [crossIcon, circleIcon];
-  //   const randomIndex = Math.floor(Math.random() * players.length);
-  //   setPlayer(players[randomIndex]);
-  // }, []);
 
   const winPatterns = [
     [0, 1, 2],
@@ -116,7 +87,6 @@ const Play = () => {
     }
 
     const newData = [...data];
-    // newData[index] = count % 2 === 0 ? 'x' : 'o';
     if (player === 'x') {
       newData[index] = 'x';
       socket.data.emit('nextPlayer');
@@ -133,7 +103,6 @@ const Play = () => {
     setCount(count + 1);
     checkWin(newData);
     setCurrentPlayer(false);
-    // setCurrentPlayer(prev => !prev)
   };
 
   const checkWin = (currentData) => {
@@ -205,7 +174,7 @@ const Play = () => {
       <div>
         <div
           className={`text-5xl font-bold flex justify-center items-center space-x-3 ${
-            gameStart && !winner ? 'visible' : 'hidden'
+            !winner ? 'visible' : 'hidden'
           }`}
         >
           {/* <img className={'w-10 h-10'} src={player} /> */}
