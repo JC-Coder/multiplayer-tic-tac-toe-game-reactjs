@@ -26,6 +26,10 @@ const Home = () => {
         if (data.success) {
           navigate('/waiting');
         }
+
+        if (!data.success && data.message) {
+          window.alert(data.message);
+        }
       });
 
       socket.data.on('joinGameRes', (data) => {
@@ -33,6 +37,10 @@ const Home = () => {
 
         if (data.success) {
           navigate('/play');
+        }
+
+        if (!data.success && data.message) {
+          window.alert(data.message);
         }
       });
     }
@@ -60,10 +68,6 @@ const Home = () => {
     }
     // navigate('/waiting');
   };
-
-  useEffect(() => {
-    console.log('create game input', createGameInput);
-  }, [createGameInput]);
 
   return (
     <>

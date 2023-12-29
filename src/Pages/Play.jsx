@@ -13,11 +13,10 @@ const Play = () => {
   const [circleScore, setCircleScore] = useState(0);
   const [crossScore, setCrossScore] = useState(0);
   const [winner, setWinner] = useState(null);
-  const [player, setPlayer] = useState(crossIcon);
+  const [player, setPlayer] = useState('x');
   const [gameStart, setGameStart] = useState(true);
   const navigate = useNavigate();
-  const [currentPlayer, setCurrentPlayer] = useState(true);
-  const [waitingForOpponent, setWaitingForOpponent] = useState(false);
+  const [currentPlayer, setCurrentPlayer] = useState(false);
 
   const dispatch = useDispatch();
   const socket = useSelector((state) => state.socket);
@@ -29,21 +28,33 @@ const Play = () => {
     if (socket) {
       // listeners
 
-      // game start
-      socket.data.on('gameStart', () => {
-        console.log('gameStart event');
-        setCurrentPlayer(false);
+      // set player value
+      socket.data.on('setPlayer', (data) => {
+        console.log('setPlayer event', data);
+        setPlayer(data);
       });
 
-      // get current player
-      socket.data.on('currentPlayer', (data) => {
-        console.log('currentPlayer', data);
-        if (data === 'x') {
-          setPlayer(crossIcon);
-        } else {
-          setPlayer(circleIcon);
-        }
+      // set starting player
+      socket.data.on('startingPlayer', () => {
+        console.log('startingPlayer event');
+        setCurrentPlayer(true);
       });
+
+      // // game start
+      // socket.data.on('gameStart', () => {
+      //   console.log('gameStart event');
+      //   setCurrentPlayer(false);
+      // });
+
+      // // get current player
+      // socket.data.on('currentPlayer', (data) => {
+      //   console.log('currentPlayer', data);
+      //   if (data === 'x') {
+      //     setPlayer(crossIcon);
+      //   } else {
+      //     setPlayer(circleIcon);
+      //   }
+      // });
 
       // toggle event
       socket.data.on('toggle', (data) => {
@@ -69,11 +80,11 @@ const Play = () => {
         }, 2000);
       });
 
-      // starting player
-      socket.data.on('startPlayer', () => {
-        console.log('startPlayer event');
-        setCurrentPlayer(true);
-      });
+      // // starting player
+      // socket.data.on('startPlayer', () => {
+      //   console.log('startPlayer event');
+      //   setCurrentPlayer(true);
+      // });
     }
   }, [socket, dispatch]);
 
@@ -106,14 +117,12 @@ const Play = () => {
 
     const newData = [...data];
     // newData[index] = count % 2 === 0 ? 'x' : 'o';
-    if (player === crossIcon) {
+    if (player === 'x') {
       newData[index] = 'x';
-      setPlayer(circleIcon);
-      socket.data.emit('currentPlayer', 'o');
+      socket.data.emit('nextPlayer');
     } else {
       newData[index] = 'o';
-      setPlayer(crossIcon);
-      socket.data.emit('currentPlayer', 'x');
+      socket.data.emit('nextPlayer');
     }
 
     if (socket) {
@@ -166,36 +175,29 @@ const Play = () => {
 
   const nextGame = () => {
     if (data.includes('') && !winner) {
-      const players = ['x', 'o'];
-      const randomIndex = Math.floor(Math.random() * players.length);
-      socket.data.emit('currentPlayer', players[randomIndex]);
       return;
     }
 
     if (socket) {
-      socket.data.emit('nextGame');
-
-      if (winner === 'x') {
-        socket.data.emit('currentPlayer', 'x');
-      } else {
-        socket.data.emit('currentPlayer', 'o');
-      }
+      const winnerData = winner === crossIcon ? 'x' : 'o';
+      socket.data.emit('nextGame', winnerData);
     }
 
     setWinner(null);
     setLock(false);
     setData(initialData);
+    setCurrentPlayer(false);
   };
 
   const endGame = () => {
-    // const res = prompt('Do you want to end game , yes / no?');
-    // console.log('prompt', res);
-    // if (res.trim().toLowerCase() === 'yes') {
-    navigate('/');
-    //   if (socket) {
-    //     socket.data.emit('endGame');
-    //   }
-    // }
+    const res = prompt('Do you want to end game , yes / no?');
+    console.log('prompt', res);
+    if (res.trim().toLowerCase() === 'yes') {
+      navigate('/');
+      if (socket) {
+        socket.data.emit('endGame');
+      }
+    }
   };
 
   return (
@@ -329,7 +331,7 @@ const Play = () => {
       </section>
       <p
         className={`text-gray-300 text-1xl ${
-          waitingForOpponent ? 'visible' : 'hidden'
+          !currentPlayer && !winner ? 'visible' : 'hidden'
         }`}
       >
         Waiting for opponent .....{' '}
