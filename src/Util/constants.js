@@ -1,3 +1,3 @@
 export const APP_CONSTANTS = {
-  baseUrl: 'https://tic-tac-teo.adaptable.app'
+  baseUrl: 'https://tic-tac-toe-jc.onrender.com'
 };
