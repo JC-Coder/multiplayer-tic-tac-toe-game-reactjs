@@ -308,7 +308,7 @@ const Play = () => {
       </div>
 
       {/* audios start */}
-      <audio ref={bgMusicRef} src={BgMusic} />
+      <audio ref={bgMusicRef} src={BgMusic} loop={true} />
 
       <GiSoundOn
         className={`size-14 absolute top-2 left-4 md:top-3 md:left-6 bg-[#173c50] p-1 text-white rounded-full cursor-pointer ${
