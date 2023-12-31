@@ -26,7 +26,6 @@ const Play = () => {
   const bgMusicRef = useRef(null);
 
   useEffect(() => {
-    console.log('se', soundEnabled);
     if (soundEnabled) {
       bgMusicRef.current.play();
     } else {
@@ -47,19 +46,16 @@ const Play = () => {
 
       // set player value
       socket.data.on('setPlayer', (data) => {
-        console.log('setPlayer event', data);
         setPlayer(data);
       });
 
       // set starting player
       socket.data.on('startingPlayer', () => {
-        console.log('startingPlayer event');
         setCurrentPlayer(true);
       });
 
       // toggle event
       socket.data.on('toggle', (data) => {
-        console.log('toggle', data);
         setData(data);
         checkWin(data);
         setCurrentPlayer(true);
@@ -91,7 +87,6 @@ const Play = () => {
 
       // socket disconnect
       socket.data.on('disconnect', () => {
-        console.log('Socket disconnected');
         navigate('/');
       });
     }
@@ -113,7 +108,6 @@ const Play = () => {
   ];
 
   const toggle = (index) => {
-    console.log({ index });
     if (lock || data[index] !== '') {
       return;
     }
@@ -141,10 +135,7 @@ const Play = () => {
   };
 
   const checkWin = (currentData) => {
-    console.log('checkWin', currentData);
-
     if (!currentData.includes('')) {
-      console.log('draw');
       // Check for a draw
       setLock(true);
       setWinner('draw');
@@ -195,7 +186,6 @@ const Play = () => {
 
   const endGame = () => {
     const res = prompt('Do you want to end game , yes / no?');
-    console.log('prompt', res);
     if (res.trim().toLowerCase() === 'yes') {
       navigate('/');
       if (socket) {
