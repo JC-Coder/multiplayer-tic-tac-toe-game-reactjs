@@ -1,8 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import circleIcon from '../assets/circle.png';
 import crossIcon from '../assets/cross.png';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
+import BgMusic from '../assets/bg-music.mp3';
+import { GiSoundOn } from 'react-icons/gi';
+import { GiSoundOff } from 'react-icons/gi';
 
 const initialData = Array(9).fill('');
 
@@ -13,12 +16,27 @@ const Play = () => {
   const [circleScore, setCircleScore] = useState(0);
   const [crossScore, setCrossScore] = useState(0);
   const [winner, setWinner] = useState(null);
-  const [player, setPlayer] = useState('x');
+  const [player, setPlayer] = useState(null);
   const navigate = useNavigate();
   const [currentPlayer, setCurrentPlayer] = useState(false);
-
   const dispatch = useDispatch();
   const socket = useSelector((state) => state.socket);
+  const [bgMusic, setBgMusic] = useState(null);
+  const [soundEnabled, setSoundEnabled] = useState();
+  const bgMusicRef = useRef(null);
+
+  useEffect(() => {
+    console.log('se', soundEnabled);
+    if (soundEnabled) {
+      bgMusicRef.current.play();
+    } else {
+      bgMusicRef.current.pause();
+    }
+  }, [soundEnabled]);
+
+  /**
+   * audio handlers end
+   */
 
   /**
    * game play socket start
@@ -62,6 +80,20 @@ const Play = () => {
           navigate('/');
         }, 2000);
       });
+
+      // opponent left
+      socket.data.on('opponentLeft', () => {
+        window.alert('Opponent has left the room');
+        setTimeout(() => {
+          navigate('/');
+        }, 1000);
+      });
+
+      // socket disconnect
+      socket.data.on('disconnect', () => {
+        console.log('Socket disconnected');
+        navigate('/');
+      });
     }
   }, [socket, dispatch]);
 
@@ -103,6 +135,9 @@ const Play = () => {
     setCount(count + 1);
     checkWin(newData);
     setCurrentPlayer(false);
+    if (soundEnabled === undefined) {
+      setSoundEnabled(true);
+    }
   };
 
   const checkWin = (currentData) => {
@@ -170,10 +205,10 @@ const Play = () => {
   };
 
   return (
-    <div className=" flex flex-col items-center justify-center space-y-6 h-[98vh] overflow-hidden">
+    <div className=" flex flex-col items-center justify-center space-y-4 h-[98vh] overflow-hidden mt-[-2rem] md:mt-0">
       <div>
         <div
-          className={`text-5xl font-bold flex justify-center items-center space-x-3 ${
+          className={`text-3xl md:text-5xl font-bold flex justify-center items-center space-x-3 ${
             !winner ? 'visible' : 'hidden'
           }`}
         >
@@ -196,48 +231,9 @@ const Play = () => {
         >
           <span>Winner :</span> <img className={'w-10 h-10'} src={winner} />
         </div>
-
-        {/* <h1 className="text-5xl font-bold" ref={titleRef}>
-          Tic Tac Toe Game In <br />{' '}
-          <span className="text-[#26ffcb]">React</span>
-        </h1> */}
-
-        {/* {!gameStart && (
-          <>
-            {winner === 'draw' && (
-              <>
-                <div className="text-5xl font-bold flex justify-center items-center space-x-3">
-                  <span> It's A Tie </span>
-                </div>
-              </>
-            )}
-        
-            </>
-}
-            <>
-            {winner !== null ? (
-                  <>
-                    {' '}
-                    <div className="text-5xl font-bold flex justify-center items-center space-x-3">
-                      <span>Winner :</span>{' '}
-                      <img className={'w-10 h-10'} src={winner} />
-                    </div>
-                  </>
-                )}
-              </>
-            ) : (
-              <>
-                <h1 className="text-5xl font-bold" ref={titleRef}>
-                  Tic Tac Toe Game In <br />{' '}
-                  <span className="text-[#26ffcb]">React</span>
-                </h1>
-              </>
-            )}
-          </>
-        )} */}
       </div>
 
-      <div className="flex items-center justify-center space-x-3 pt-4">
+      <div className="flex items-center justify-center space-x-3 pt-0 pb-2 ">
         {/* <p className={'label text-3xl text-red-400'}>O</p> */}
         <img src={circleIcon} className={'w-10 h-10'} />
         <h3 className={'text-3xl font-bold'}>{circleScore}</h3>
@@ -308,18 +304,41 @@ const Play = () => {
 
       <div className="actionButtons">
         <button
-          className={'button-1 bg-[#1f3540] text-[#26ffcb]'}
+          className={'button-1-md bg-[#1f3540] text-[#26ffcb]'}
           onClick={endGame}
         >
           EndGame
         </button>
         <button
-          className={'button-1 bg-[#27ffcb] text-black'}
+          className={'button-1-md bg-[#27ffcb] text-black'}
           onClick={nextGame}
         >
           Continue
         </button>
       </div>
+
+      {/* audios start */}
+      <audio ref={bgMusicRef} src={BgMusic} />
+
+      <GiSoundOn
+        className={`size-14 absolute top-2 left-4 md:top-3 md:left-6 bg-[#173c50] p-1 text-white rounded-full cursor-pointer ${
+          soundEnabled ? 'visible' : 'hidden'
+        }`}
+        onClick={() => {
+          setSoundEnabled(false);
+        }}
+      />
+
+      <GiSoundOff
+        className={`size-14 absolute top-2 left-4 md:top-3 md:left-6  bg-[#173c50] p-1 text-white rounded-full cursor-pointer ${
+          !soundEnabled ? 'visible' : 'hidden'
+        }`}
+        onClick={() => {
+          setSoundEnabled(true);
+        }}
+      />
+
+      {/* audios end */}
     </div>
   );
 };

@@ -55,7 +55,7 @@ const Home = () => {
     // navigate('/play');
     if (socket) {
       socket.data.emit('joinGame', {
-        name: joinGameInput
+        name: joinGameInput.toLocaleLowerCase()
       });
     }
   };
@@ -63,7 +63,7 @@ const Home = () => {
   const handleCreateGame = () => {
     if (socket) {
       socket.data.emit('createGame', {
-        name: createGameInput
+        name: createGameInput.toLocaleLowerCase()
       });
     }
     // navigate('/waiting');
@@ -108,7 +108,6 @@ const Home = () => {
               <input
                 type="text"
                 name="username"
-                id="username"
                 autoComplete="username"
                 className={
                   'block flex-1 border-0 bg-transparent py-2 pl-3 text-white placeholder:text-gray-400 focus:ring-0 sm:text-md sm:leading-6 outline-none'
@@ -149,7 +148,6 @@ const Home = () => {
               <input
                 type="text"
                 name="username"
-                id="username"
                 autoComplete="username"
                 className={
                   'block flex-1 border-0 bg-transparent py-2 pl-3 text-white placeholder:text-gray-400 focus:ring-0 sm:text-md sm:leading-6 outline-none'

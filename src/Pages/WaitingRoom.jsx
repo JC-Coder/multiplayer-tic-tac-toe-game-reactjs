@@ -21,6 +21,12 @@ const WaitingRoom = () => {
     }
   }, [socket, dispatch]);
 
+  const goHome = () => {
+    socket.data.emit('deleteGame');
+
+    navigate('/');
+  };
+
   return (
     <div className={'container flex items-center justify-center h-[98vh]'}>
       <section
@@ -37,14 +43,14 @@ const WaitingRoom = () => {
           </p>
         </div>
 
-        <div class="flex items-center justify-center">
-          <div class="border-t-4 border-blue-500 border-solid rounded-full animate-spin h-12 w-12"></div>
+        <div className="flex items-center justify-center">
+          <div className="border-t-4 border-blue-500 border-solid rounded-full animate-spin h-12 w-12"></div>
         </div>
 
         <div>
           <button
             className="button-1 bg-[#0f1b21] text-white"
-            onClick={() => navigate('/')}
+            onClick={goHome}
           >
             Go Home
           </button>

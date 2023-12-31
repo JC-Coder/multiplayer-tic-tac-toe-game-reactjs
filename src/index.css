@@ -30,3 +30,17 @@
   margin: 5px;
   font-weight: bold;
 }
+
+.button-1-md {
+  width: 150px;
+  height: 50px;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  border-radius: 50px;
+  font-size: 20px;
+  margin-top: 25px;
+  margin-bottom: 50px;
+  margin: 5px;
+  font-weight: bold;
+}

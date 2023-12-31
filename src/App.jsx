@@ -17,7 +17,7 @@ function App() {
 
   useEffect(() => {
     if (!socket) {
-      const newSocket = io(APP_CONSTANTS.baseUrl); 
+      const newSocket = io(APP_CONSTANTS.baseUrl);
 
       newSocket.on('connect', () => {
         console.log('connected', newSocket);
